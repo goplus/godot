@@ -1,5 +1,5 @@
 /**************************************************************************/
-/*  libgodot_ios.mm                                                       */
+/*  libgodot_windows.cpp                                                 */
 /**************************************************************************/
 /*                         This file is part of:                          */
 /*                             GODOT ENGINE                               */
@@ -28,20 +28,21 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                 */
 /**************************************************************************/
 
-#include "core/extension/godot_instance.h"
 #include "core/extension/libgodot.h"
+
+#include "core/extension/godot_instance.h"
 #include "main/main.h"
 
-#import "os_ios.h"
+#include "os_windows.h"
 
-static OS_IOS *os = nullptr;
+static OS_Windows *os = nullptr;
 
 static GodotInstance *instance = nullptr;
 
 GDExtensionObjectPtr libgodot_create_godot_instance(int p_argc, char *p_argv[], GDExtensionInitializationFunction p_init_func, void *p_platform_data) {
 	ERR_FAIL_COND_V_MSG(instance != nullptr, nullptr, "Only one Godot Instance may be created.");
 
-	os = new OS_IOS();
+	os = new OS_Windows((HINSTANCE) p_platform_data);
 
 	Error err = Main::setup(p_argv[0], p_argc - 1, &p_argv[1], false);
 	if (err != OK) {

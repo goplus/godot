@@ -49,7 +49,7 @@ extern "C" {
  *
  * @return A pointer to created \ref GodotInstance GDExtension object or nullptr if there was an error.
  */
-GDExtensionObjectPtr libgodot_create_godot_instance(int p_argc, char *p_argv[], GDExtensionInitializationFunction p_init_func);
+GDExtensionObjectPtr libgodot_create_godot_instance(int p_argc, char *p_argv[], GDExtensionInitializationFunction p_init_func, void *p_platform_data);
 
 /**
  * @name libgodot_destroy_godot_instance
