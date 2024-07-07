@@ -27,9 +27,18 @@
 /* TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE      */
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                 */
 /**************************************************************************/
-
 #ifndef LIBGODOT_H
 #define LIBGODOT_H
+#ifdef _WIN32
+    #define EXPORT_SYMBOL __declspec(dllexport)
+#elif defined(__GNUC__)
+    #define EXPORT_SYMBOL __attribute__((visibility("default")))
+#else
+    #define EXPORT_SYMBOL
+#endif
+
+
+
 
 #ifdef __cplusplus
 extern "C" {
@@ -49,7 +58,7 @@ extern "C" {
  *
  * @return A pointer to created \ref GodotInstance GDExtension object or nullptr if there was an error.
  */
-__declspec(dllexport) GDExtensionObjectPtr libgodot_create_godot_instance(int p_argc, char *p_argv[], GDExtensionInitializationFunction p_init_func, void *p_platform_data);
+EXPORT_SYMBOL GDExtensionObjectPtr libgodot_create_godot_instance(int p_argc, char *p_argv[], GDExtensionInitializationFunction p_init_func, void *p_platform_data);
 
 /**
  * @name libgodot_destroy_godot_instance
@@ -60,7 +69,30 @@ __declspec(dllexport) GDExtensionObjectPtr libgodot_create_godot_instance(int p_
  * @param p_godot_instance The reference to the GodotInstance object to destroy.
  *
  */
-__declspec(dllexport) void libgodot_destroy_godot_instance(GDExtensionObjectPtr p_godot_instance);
+EXPORT_SYMBOL void libgodot_destroy_godot_instance(GDExtensionObjectPtr p_godot_instance);
+
+
+/**
+ * @name libgodot_start_godot_instance
+ * @since 4.4
+ *
+ * Godot instance start.
+ *
+ * @param p_godot_instance The reference to the GodotInstance object to destroy.
+ *
+ */
+EXPORT_SYMBOL bool libgodot_start_godot_instance(GDExtensionObjectPtr p_godot_instance);
+/**
+ * @name libgodot_iteration_godot_instance
+ * @since 4.4
+ *
+ * Godot instance iteration.
+ *
+ * @param p_godot_instance The reference to the GodotInstance object to destroy.
+ *
+ */
+EXPORT_SYMBOL bool libgodot_iteration_godot_instance(GDExtensionObjectPtr p_godot_instance);
+
 
 #ifdef __cplusplus
 }
