@@ -1,5 +1,5 @@
 /**************************************************************************/
-/*  libgodot_windows.cpp                                                 */
+/*  libgodot_windows.cpp                                                  */
 /**************************************************************************/
 /*                         This file is part of:                          */
 /*                             GODOT ENGINE                               */
@@ -42,7 +42,7 @@ static GodotInstance *instance = nullptr;
 GDExtensionObjectPtr libgodot_create_godot_instance(int p_argc, char *p_argv[], GDExtensionInitializationFunction p_init_func, void *p_platform_data) {
 	ERR_FAIL_COND_V_MSG(instance != nullptr, nullptr, "Only one Godot Instance may be created.");
 
-	os = new OS_Windows((HINSTANCE) p_platform_data);
+	os = new OS_Windows((HINSTANCE)p_platform_data);
 
 	Error err = Main::setup(p_argv[0], p_argc - 1, &p_argv[1], false);
 	if (err != OK) {
@@ -78,7 +78,6 @@ bool libgodot_start_godot_instance(GDExtensionObjectPtr p_godot_instance) {
 	return ret;
 }
 
-
 bool libgodot_iteration_godot_instance(GDExtensionObjectPtr p_godot_instance) {
 	bool ret = false;
 	GodotInstance *godot_instance = (GodotInstance *)p_godot_instance;
@@ -87,4 +86,3 @@ bool libgodot_iteration_godot_instance(GDExtensionObjectPtr p_godot_instance) {
 	}
 	return ret;
 }
-
