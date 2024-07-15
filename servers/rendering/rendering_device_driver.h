@@ -357,6 +357,8 @@ public:
 		BitField<BarrierAccessBits> dst_access;
 	};
 
+	typedef MemoryBarrier MemoryBarrierAlias;
+
 	struct BufferBarrier {
 		BufferID buffer;
 		BitField<BarrierAccessBits> src_access;
