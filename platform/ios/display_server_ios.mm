@@ -45,6 +45,10 @@
 
 #import <sys/utsname.h>
 
+#if defined(RD_ENABLED)
+#include "drivers/apple/rendering_native_surface_apple.h"
+#endif
+
 static const float kDisplayServerIOSAcceleration = 1.f;
 
 DisplayServerIOS *DisplayServerIOS::get_singleton() {
