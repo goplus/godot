@@ -38,6 +38,7 @@
 #include "core/config/project_settings.h"
 
 #if defined(RD_ENABLED)
+#include "rendering_native_surface_android.h"
 #include "servers/rendering/renderer_rd/renderer_compositor_rd.h"
 #include "servers/rendering/rendering_device.h"
 #endif
