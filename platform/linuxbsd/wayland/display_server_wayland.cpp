@@ -168,8 +168,8 @@ bool DisplayServerWayland::_show_window() {
 			}
 		}
 
-		Error err = rendering_context->window_create(wd.id, wayland_surface);
-		ERR_FAIL_COND_V_MSG(err != OK, false, vformat("Can't create a %s window", rendering_driver));
+		Error create_err = rendering_context->window_create(wd.id, wayland_surface);
+		ERR_FAIL_COND_V_MSG(create_err != OK, false, vformat("Can't create a %s window", rendering_driver));
 
 		rendering_context->window_set_size(wd.id, wd.rect.size.width, wd.rect.size.height);
 		rendering_context->window_set_vsync_mode(wd.id, wd.vsync_mode);
