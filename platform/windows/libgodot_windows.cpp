@@ -68,3 +68,21 @@ void libgodot_destroy_godot_instance(GDExtensionObjectPtr p_godot_instance) {
 		Main::cleanup();
 	}
 }
+
+bool libgodot_start_godot_instance(GDExtensionObjectPtr p_godot_instance) {
+	bool ret = false;
+	GodotInstance *godot_instance = (GodotInstance *)p_godot_instance;
+	if (instance == godot_instance) {
+		ret = godot_instance->start();
+	}
+	return ret;
+}
+
+bool libgodot_iteration_godot_instance(GDExtensionObjectPtr p_godot_instance) {
+	bool ret = false;
+	GodotInstance *godot_instance = (GodotInstance *)p_godot_instance;
+	if (instance == godot_instance) {
+		ret = godot_instance->iteration();
+	}
+	return ret;
+}
