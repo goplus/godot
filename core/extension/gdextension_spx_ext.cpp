@@ -42,6 +42,10 @@
 #include "core/os/memory.h"
 #include "core/variant/variant.h"
 #include "core/version.h"
+#include "scene/main/window.h"
+
+static void gdextension_spx_global_register_callbacks(GDExtensionSpxCallbackInfoPtr callback_ptr) {
+}
 
 // input
 static gdvec2 gdextension_spx_input_get_mouse_pos() { return gdvec2(); }
@@ -55,12 +59,21 @@ static gdbool gdextension_spx_input_is_action_just_released(gdstring action) { r
 // audio manager
 static void gdextension_spx_audio_play_audio(gdstring path) { print_line(vformat("Playing %s", path)); }
 static void gdextension_spx_audio_set_audio_volume(gdfloat volume) { print_line(vformat("Setting volume to %f", volume)); }
-static gdfloat gdextension_spx_audio_get_audio_volume() { print_line("GetAudioVolume"); return 0; }
+
+static gdfloat gdextension_spx_audio_get_audio_volume() {
+	print_line("GetAudioVolume");
+	return 0;
+}
 
 static gdbool gdextension_spx_audio_is_music_playing() { return false; }
 static void gdextension_spx_audio_play_music(gdstring path) { print_line(vformat("Playing music %s", path)); }
 static void gdextension_spx_audio_set_music_volume(gdfloat volume) { print_line(vformat("Setting music volume to %f", volume)); }
-static gdfloat gdextension_spx_audio_get_music_volume() { print_line("GetMusicVolume"); return 0; }
+
+static gdfloat gdextension_spx_audio_get_music_volume() {
+	print_line("GetMusicVolume");
+	return 0;
+}
+
 static void gdextension_spx_audio_pause_music() { print_line("PauseMusic"); }
 static void gdextension_spx_audio_resume_music() { print_line("ResumeMusic"); }
 static gdfloat gdextension_spx_audio_get_music_timer() { return 0; }
@@ -149,9 +162,10 @@ static void gdextension_spx_ui_set_visible(gdint id, gdbool visible) { print_lin
 static gdbool gdextension_spx_ui_get_visible(gdint id) { return false; }
 
 
-
 #define REGISTER_SPX_INTERFACE_FUNC(m_name) GDExtension::register_interface_function("spx_"#m_name, (GDExtensionInterfaceFunctionPtr)&gdextension_spx_##m_name)
+
 static void gdextension_spx_ext() {
+	REGISTER_SPX_INTERFACE_FUNC(global_register_callbacks);
 	REGISTER_SPX_INTERFACE_FUNC(input_get_mouse_pos);
 	REGISTER_SPX_INTERFACE_FUNC(input_get_mouse_state);
 	REGISTER_SPX_INTERFACE_FUNC(input_get_key_state);

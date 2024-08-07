@@ -80,6 +80,7 @@
 #include "servers/text/text_server_dummy.h"
 #include "servers/text_server.h"
 #include "servers/xr_server.h"
+#include "core/extension/gdextension_spx_engine.h"
 
 #ifdef TESTS_ENABLED
 #include "tests/test_main.h"
@@ -3503,6 +3504,8 @@ bool Main::start() {
 			}
 
 			OS::get_singleton()->benchmark_end_measure("game_load");
+
+			SpxEngine::Start(sml->get_root());
 		}
 
 #ifdef TOOLS_ENABLED

@@ -56,6 +56,9 @@ typedef Vector2 gdvec2;
 typedef Color	gdcolor;
 typedef Rect2	gdrect;
 
+typedef void *GDExtensionSpxCallbackInfoPtr;
+typedef void (*GDExtensionSpxGlobalRegisterCallbacks)(GDExtensionSpxCallbackInfoPtr callback_ptr);
+
 typedef gdvec2 (*GDExtensionSpxInputGetMousePos)();
 typedef gdbool (*GDExtensionSpxInputGetMouseState)(gdint id);
 typedef gdint (*GDExtensionSpxInputGetKeyState)(gdint key);
@@ -226,8 +229,6 @@ typedef struct {
 	GDExtensionSpxCallbackOnUITextChanged func_on_ui_text_changed;
 
 } SpxCallbackInfo;
-
-
 
 
 #ifdef __cplusplus
