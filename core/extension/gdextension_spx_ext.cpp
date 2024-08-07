@@ -1,5 +1,5 @@
 ﻿/**************************************************************************/
-/*  gdextension_interface.cpp                                             */
+/*  gdextension_spx_ext.cpp                                               */
 /**************************************************************************/
 /*                         This file is part of:                          */
 /*                             GODOT ENGINE                               */
@@ -29,7 +29,7 @@
 /**************************************************************************/
 
 #include "gdextension_interface.h"
-#include "extension_spx_ext.h"
+#include "gdextension_spx_ext.h"
 
 #include "core/config/engine.h"
 #include "core/extension/gdextension.h"

@@ -41,7 +41,7 @@
 #include "core/os/memory.h"
 #include "core/variant/variant.h"
 #include "core/version.h"
-#include "core/extension/extension_spx_ext.cpp"
+#include "core/extension/gdextension_spx_ext.cpp"
 
 class CallableCustomExtension : public CallableCustom {
 	void *userdata;
