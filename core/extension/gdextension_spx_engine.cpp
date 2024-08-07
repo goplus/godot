@@ -32,9 +32,7 @@
 #include "scene/main/node.h"
 #include "gdextension_spx_engine.h"
 
-
 void SpxEngine::Start(void* root) {
-	// TODO jiepengtan register SpxEngineNode type, and instantiate it
 	Node* tree = (Node *)root;
 	if (tree != nullptr) {
 		Node *new_node = memnew(Node);
@@ -43,3 +41,8 @@ void SpxEngine::Start(void* root) {
 		print_line("SpxEngine Init " );
 	}
 }
+
+void SpxEngine::Update(float deltaTime) {
+	//print_line("SpxEngine Update...");
+}
+

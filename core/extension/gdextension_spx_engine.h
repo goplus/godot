@@ -31,8 +31,9 @@
 #define GDEXTENSION_SPX_ENGINE_H
 
 class SpxEngine  {
-public:
+public :
 	static void Start(void* root);
+	static void Update(float deltaTime);
 };
 
 #endif // GDEXTENSION_SPX_ENGINE_H
