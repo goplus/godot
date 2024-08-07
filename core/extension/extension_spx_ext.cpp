@@ -29,6 +29,7 @@
 /**************************************************************************/
 
 #include "gdextension_interface.h"
+#include "extension_spx_ext.h"
 
 #include "core/config/engine.h"
 #include "core/extension/gdextension.h"
@@ -41,16 +42,6 @@
 #include "core/os/memory.h"
 #include "core/variant/variant.h"
 #include "core/version.h"
-
-typedef GDExtensionConstStringPtr gdstring;
-typedef GDExtensionInt	gdint;
-typedef GDExtensionBool gdbool;
-typedef real_t	gdfloat;
-typedef Vector4 gdvec4;
-typedef Vector3 gdvec3;
-typedef Vector2 gdvec2;
-typedef Color	gdcolor;
-typedef Rect2	gdrect;
 
 // input
 static gdvec2 gdextension_spx_input_get_mouse_pos() { return gdvec2(); }
