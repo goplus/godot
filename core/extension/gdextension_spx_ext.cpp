@@ -30,6 +30,7 @@
 
 #include "gdextension_interface.h"
 #include "gdextension_spx_ext.h"
+#include "gdextension_spx_engine.h"
 
 #include "core/config/engine.h"
 #include "core/extension/gdextension.h"
@@ -43,8 +44,9 @@
 #include "core/variant/variant.h"
 #include "core/version.h"
 #include "scene/main/window.h"
-
 static void gdextension_spx_global_register_callbacks(GDExtensionSpxCallbackInfoPtr callback_ptr) {
+	SpxEngine::spx_callback_info = *(SpxCallbackInfo*)callback_ptr;
+	print_line("register callbacks");
 }
 
 // input

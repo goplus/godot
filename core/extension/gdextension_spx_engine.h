@@ -29,11 +29,14 @@
 /**************************************************************************/
 #ifndef GDEXTENSION_SPX_ENGINE_H
 #define GDEXTENSION_SPX_ENGINE_H
+#include "gdextension_spx_ext.h"
 
 class SpxEngine  {
 public :
-	static void Start(void* root);
-	static void Update(float deltaTime);
+	static SpxCallbackInfo spx_callback_info;
+	static void on_start(void* root);
+	static void on_update(float delta);
+	static void on_destroy();
 };
 
 #endif // GDEXTENSION_SPX_ENGINE_H

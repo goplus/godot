@@ -31,18 +31,31 @@
 
 #include "scene/main/node.h"
 #include "gdextension_spx_engine.h"
+#include "gdextension_spx_ext.h"
 
-void SpxEngine::Start(void* root) {
+SpxCallbackInfo SpxEngine::spx_callback_info;
+void SpxEngine::on_start(void* root) {
 	Node* tree = (Node *)root;
 	if (tree != nullptr) {
 		Node *new_node = memnew(Node);
 		new_node->set_name("SpxEngineNode");
 		tree->add_child(new_node);
-		print_line("SpxEngine Init " );
+	}
+	if(spx_callback_info.func_on_engine_start != nullptr) {
+		spx_callback_info.func_on_engine_start();
 	}
 }
 
-void SpxEngine::Update(float deltaTime) {
-	//print_line("SpxEngine Update...");
+void SpxEngine::on_update(float delta) {
+	if(spx_callback_info.func_on_engine_update != nullptr) {
+		spx_callback_info.func_on_engine_update(delta);
+	}
+}
+
+void SpxEngine::on_destroy() {
+	if(spx_callback_info.func_on_engine_destroy != nullptr) {
+		spx_callback_info.func_on_engine_destroy();
+	}
+	spx_callback_info = SpxCallbackInfo();
 }
 

@@ -34,8 +34,9 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include "gdextension_interface.h"
+#ifndef NOT_GODOT_ENGINE
 #include "core/variant/variant.h"
-
+#endif
 
 #ifndef __cplusplus
 typedef uint32_t char32_t;
@@ -46,7 +47,7 @@ typedef uint16_t char16_t;
 extern "C" {
 #endif
 
-typedef GDExtensionConstStringPtr gdstring;
+typedef GDExtensionStringPtr gdstring;
 typedef GDExtensionInt	gdint;
 typedef GDExtensionBool gdbool;
 typedef real_t	gdfloat;
@@ -112,7 +113,7 @@ typedef gdbool (*GDExtensionSpxPhysicIsCollisionEnabled)(gdint id);
 
 
 // sprite
-typedef gdint (*GDExtensionSpxSpriteInstantiateSprite)(gdstring path);
+typedef gdint (*GDExtensionSpxSpriteCreateSprite)(gdstring path);
 typedef gdint (*GDExtensionSpxSpriteCloneSprite)(gdint id);
 typedef gdbool (*GDExtensionSpxSpriteDestroySprite)(gdint id);
 typedef gdbool (*GDExtensionSpxSpriteIsSpriteAlive)(gdint id);
@@ -167,6 +168,10 @@ typedef gdbool (*GDExtensionSpxUIGetVisible)(gdint id);
 
 
 // callback
+typedef void (*GDExtensionSpxCallbackOnEngineStart) ();
+typedef void (*GDExtensionSpxCallbackOnEngineUpdate) (gdfloat delta);
+typedef void (*GDExtensionSpxCallbackOnEngineDestroy) ();
+
 typedef void (*GDExtensionSpxCallbackOnSpriteReady) (gdint id);
 typedef void (*GDExtensionSpxCallbackOnSpriteUpdated) (gdint id);
 typedef void (*GDExtensionSpxCallbackOnSpriteDestroyed) (gdint id);
@@ -197,6 +202,11 @@ typedef void (*GDExtensionSpxCallbackOnUITextChanged) (gdint id, gdstring text);
 
 
 typedef struct {
+	// engine
+	GDExtensionSpxCallbackOnEngineStart func_on_engine_start;
+	GDExtensionSpxCallbackOnEngineUpdate func_on_engine_update;
+	GDExtensionSpxCallbackOnEngineDestroy func_on_engine_destroy;
+
 	// sprite
 	GDExtensionSpxCallbackOnSpriteReady func_on_sprite_ready;
 	GDExtensionSpxCallbackOnSpriteUpdated func_on_sprite_updated;
