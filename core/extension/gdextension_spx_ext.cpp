@@ -44,124 +44,126 @@
 #include "core/variant/variant.h"
 #include "core/version.h"
 #include "scene/main/window.h"
+
+
 static void gdextension_spx_global_register_callbacks(GDExtensionSpxCallbackInfoPtr callback_ptr) {
 	SpxEngine::spx_callback_info = *(SpxCallbackInfo*)callback_ptr;
 	print_line("register callbacks");
 }
 
 // input
-static gdvec2 gdextension_spx_input_get_mouse_pos() { return gdvec2(); }
-static gdbool gdextension_spx_input_get_mouse_state(gdint id) { return false; }
-static gdint gdextension_spx_input_get_key_state(gdint key) { return 0; }
-static gdfloat gdextension_spx_input_get_axis(gdstring axis) { return 0; }
-static gdbool gdextension_spx_input_is_action_pressed(gdstring action) { return false; }
-static gdbool gdextension_spx_input_is_action_just_pressed(gdstring action) { return false; }
-static gdbool gdextension_spx_input_is_action_just_released(gdstring action) { return false; }
+static GdVec2 gdextension_spx_input_get_mouse_pos() { return GdVec2(); }
+static GdBool gdextension_spx_input_get_mouse_state(GdInt id) { return false; }
+static GdInt gdextension_spx_input_get_key_state(GdInt key) { return 0; }
+static GdFloat gdextension_spx_input_get_axis(GdString axis) { return 0; }
+static GdBool gdextension_spx_input_is_action_pressed(GdString action) { return false; }
+static GdBool gdextension_spx_input_is_action_just_pressed(GdString action) { return false; }
+static GdBool gdextension_spx_input_is_action_just_released(GdString action) { return false; }
 
 // audio manager
-static void gdextension_spx_audio_play_audio(gdstring path) { print_line(vformat("Playing %s", path)); }
-static void gdextension_spx_audio_set_audio_volume(gdfloat volume) { print_line(vformat("Setting volume to %f", volume)); }
+static void gdextension_spx_audio_play_audio(GdString path) { print_line(vformat("Playing %s", path)); }
+static void gdextension_spx_audio_set_audio_volume(GdFloat volume) { print_line(vformat("Setting volume to %f", volume)); }
 
-static gdfloat gdextension_spx_audio_get_audio_volume() {
+static GdFloat gdextension_spx_audio_get_audio_volume() {
 	print_line("GetAudioVolume");
 	return 0;
 }
 
-static gdbool gdextension_spx_audio_is_music_playing() { return false; }
-static void gdextension_spx_audio_play_music(gdstring path) { print_line(vformat("Playing music %s", path)); }
-static void gdextension_spx_audio_set_music_volume(gdfloat volume) { print_line(vformat("Setting music volume to %f", volume)); }
+static GdBool gdextension_spx_audio_is_music_playing() { return false; }
+static void gdextension_spx_audio_play_music(GdString path) { print_line(vformat("Playing music %s", path)); }
+static void gdextension_spx_audio_set_music_volume(GdFloat volume) { print_line(vformat("Setting music volume to %f", volume)); }
 
-static gdfloat gdextension_spx_audio_get_music_volume() {
+static GdFloat gdextension_spx_audio_get_music_volume() {
 	print_line("GetMusicVolume");
 	return 0;
 }
 
 static void gdextension_spx_audio_pause_music() { print_line("PauseMusic"); }
 static void gdextension_spx_audio_resume_music() { print_line("ResumeMusic"); }
-static gdfloat gdextension_spx_audio_get_music_timer() { return 0; }
-static void gdextension_spx_audio_set_music_timer(gdfloat time) { print_line(vformat("Setting music timer to %f", time)); }
+static GdFloat gdextension_spx_audio_get_music_timer() { return 0; }
+static void gdextension_spx_audio_set_music_timer(GdFloat time) { print_line(vformat("Setting music timer to %f", time)); }
 
 // physic
-static void gdextension_spx_physic_set_gravity(gdfloat gravity) { print_line(vformat("Setting gravity to %f", gravity)); }
-static gdfloat gdextension_spx_physic_get_gravity() { return 0; }
+static void gdextension_spx_physic_set_gravity(GdFloat gravity) { print_line(vformat("Setting gravity to %f", gravity)); }
+static GdFloat gdextension_spx_physic_get_gravity() { return 0; }
 
-static void gdextension_spx_physic_set_velocity(gdint id, gdvec2 velocity) { print_line(vformat("Setting velocity of %d to %f, %f", id, velocity.x, velocity.y)); }
-static gdvec2 gdextension_spx_physic_get_velocity(gdint id) { return gdvec2(); }
+static void gdextension_spx_physic_set_velocity(GdInt id, GdVec2 velocity) { print_line(vformat("Setting velocity of %d to %f, %f", id, velocity.x, velocity.y)); }
+static GdVec2 gdextension_spx_physic_get_velocity(GdInt id) { return GdVec2(); }
 
-static void gdextension_spx_physic_set_mass(gdint id, gdfloat mass) { print_line(vformat("Setting mass of %d to %f", id, mass)); }
-static gdfloat gdextension_spx_physic_get_mass(gdint id) { return 0; }
+static void gdextension_spx_physic_set_mass(GdInt id, GdFloat mass) { print_line(vformat("Setting mass of %d to %f", id, mass)); }
+static GdFloat gdextension_spx_physic_get_mass(GdInt id) { return 0; }
 
-static void gdextension_spx_physic_add_force(gdint id, gdvec2 force) { print_line(vformat("Adding force to %d %f, %f", id, force.x, force.y)); }
-static void gdextension_spx_physic_add_impulse(gdint id, gdvec2 impulse) { print_line(vformat("Adding impulse to %d %f, %f", id, impulse.x, impulse.y)); }
-static void gdextension_spx_physic_set_collision_layer(gdint id, gdint layer) { print_line(""); }
+static void gdextension_spx_physic_add_force(GdInt id, GdVec2 force) { print_line(vformat("Adding force to %d %f, %f", id, force.x, force.y)); }
+static void gdextension_spx_physic_add_impulse(GdInt id, GdVec2 impulse) { print_line(vformat("Adding impulse to %d %f, %f", id, impulse.x, impulse.y)); }
+static void gdextension_spx_physic_set_collision_layer(GdInt id, GdInt layer) { print_line(""); }
 
-static gdint gdextension_spx_physic_get_collision_layer(gdint id) { return 0; }
-static void gdextension_spx_physic_set_collision_mask(gdint id, gdint mask) { print_line(vformat("Setting collision mask of %d to %d", id, mask)); }
-static gdint gdextension_spx_physic_get_collision_mask(gdint id) { return 0; }
+static GdInt gdextension_spx_physic_get_collision_layer(GdInt id) { return 0; }
+static void gdextension_spx_physic_set_collision_mask(GdInt id, GdInt mask) { print_line(vformat("Setting collision mask of %d to %d", id, mask)); }
+static GdInt gdextension_spx_physic_get_collision_mask(GdInt id) { return 0; }
 
-static gdint gdextension_spx_physic_get_collider_type(gdint id) { return 0; }
-static void gdextension_spx_physic_add_collider_rect(gdint id, gdvec2 center, gdvec2 size) { print_line(""); }
-static void gdextension_spx_physic_add_collider_circle(gdint id, gdvec2 center, gdfloat radius) { print_line(""); }
-static void gdextension_spx_physic_add_collider_capsule(gdint id, gdvec2 center, gdvec2 size) { print_line(""); }
+static GdInt gdextension_spx_physic_get_collider_type(GdInt id) { return 0; }
+static void gdextension_spx_physic_add_collider_rect(GdInt id, GdVec2 center, GdVec2 size) { print_line(""); }
+static void gdextension_spx_physic_add_collider_circle(GdInt id, GdVec2 center, GdFloat radius) { print_line(""); }
+static void gdextension_spx_physic_add_collider_capsule(GdInt id, GdVec2 center, GdVec2 size) { print_line(""); }
 
-static void gdextension_spx_physic_set_trigger(gdint id, gdbool trigger) { print_line(vformat("Setting trigger of %d to %d", id, trigger)); }
-static gdbool gdextension_spx_physic_is_trigger(gdint id) { return false; }
+static void gdextension_spx_physic_set_trigger(GdInt id, GdBool trigger) { print_line(vformat("Setting trigger of %d to %d", id, trigger)); }
+static GdBool gdextension_spx_physic_is_trigger(GdInt id) { return false; }
 
-static void gdextension_spx_physic_set_collision_enabled(gdint id, gdbool enabled) { print_line(""); }
-static gdbool gdextension_spx_physic_is_collision_enabled(gdint id) { return false; }
+static void gdextension_spx_physic_set_collision_enabled(GdInt id, GdBool enabled) { print_line(""); }
+static GdBool gdextension_spx_physic_is_collision_enabled(GdInt id) { return false; }
 
 
 // sprite
-static gdint gdextension_spx_sprite_instantiate_sprite(gdstring path) { return 0; }
-static gdint gdextension_spx_sprite_clone_sprite(gdint id) { return 0; }
-static gdbool gdextension_spx_sprite_destroy_sprite(gdint id) { return false; }
-static gdbool gdextension_spx_sprite_is_sprite_alive(gdint id) { return false; }
+static GdInt gdextension_spx_sprite_instantiate_sprite(GdString path) { return 0; }
+static GdInt gdextension_spx_sprite_clone_sprite(GdInt id) { return 0; }
+static GdBool gdextension_spx_sprite_destroy_sprite(GdInt id) { return false; }
+static GdBool gdextension_spx_sprite_is_sprite_alive(GdInt id) { return false; }
 
-static void gdextension_spx_sprite_set_position(gdint id, gdvec2 pos) { print_line(vformat("Updating position of %d to %f, %f", id, pos.x, pos.y)); }
-static void gdextension_spx_sprite_set_rotation(gdint id, gdvec2 rot) { print_line(vformat("Updating rotation of %d to %f, %f", id, rot.x, rot.y)); }
-static void gdextension_spx_sprite_set_scale(gdint id, gdvec2 scale) { print_line(vformat("Updating scale of %d to %f, %f", id, scale.x, scale.y)); }
+static void gdextension_spx_sprite_set_position(GdInt id, GdVec2 pos) { print_line(vformat("Updating position of %d to %f, %f", id, pos.x, pos.y)); }
+static void gdextension_spx_sprite_set_rotation(GdInt id, GdVec2 rot) { print_line(vformat("Updating rotation of %d to %f, %f", id, rot.x, rot.y)); }
+static void gdextension_spx_sprite_set_scale(GdInt id, GdVec2 scale) { print_line(vformat("Updating scale of %d to %f, %f", id, scale.x, scale.y)); }
 
-static gdvec2 gdextension_spx_sprite_get_position(gdint id) { return gdvec2(); }
-static gdvec2 gdextension_spx_sprite_get_rotation(gdint id) { return gdvec2(); }
-static gdvec2 gdextension_spx_sprite_get_scale(gdint id) { return gdvec2(); }
+static GdVec2 gdextension_spx_sprite_get_position(GdInt id) { return GdVec2(); }
+static GdVec2 gdextension_spx_sprite_get_rotation(GdInt id) { return GdVec2(); }
+static GdVec2 gdextension_spx_sprite_get_scale(GdInt id) { return GdVec2(); }
 
-static void gdextension_spx_sprite_set_color(gdint id, gdcolor gdcolor) { print_line(vformat("Updating gdcolor of %d to %f, %f, %f, %f", id, gdcolor.r, gdcolor.g, gdcolor.b, gdcolor.a)); }
-static gdcolor gdextension_spx_sprite_get_color(gdint id) { return gdcolor(); }
+static void gdextension_spx_sprite_set_color(GdInt id, GdColor GdColor) { print_line(vformat("Updating GdColor of %d to %f, %f, %f, %f", id, GdColor.r, GdColor.g, GdColor.b, GdColor.a)); }
+static GdColor gdextension_spx_sprite_get_color(GdInt id) { return GdColor(); }
 
-static void gdextension_spx_sprite_update_texture(gdint id, gdstring path) { print_line(vformat("Updating texture of %d to %s", id, path)); }
-static gdstring gdextension_spx_sprite_get_texture(gdint id) { return nullptr; }
+static void gdextension_spx_sprite_update_texture(GdInt id, GdString path) { print_line(vformat("Updating texture of %d to %s", id, path)); }
+static GdString gdextension_spx_sprite_get_texture(GdInt id) { return nullptr; }
 
-static void gdextension_spx_sprite_set_visible(gdint id, gdbool visible) { print_line(vformat("Updating visibility of %d to %s", id, visible ? "true" : "false")); }
-static gdbool gdextension_spx_sprite_get_visible(gdint id) { return false; }
-static void gdextension_spx_sprite_update_z_index(gdint id, gdint z) { print_line(vformat("Updating z index of %d to %d", id, z)); }
+static void gdextension_spx_sprite_set_visible(GdInt id, GdBool visible) { print_line(vformat("Updating visibility of %d to %s", id, visible ? "true" : "false")); }
+static GdBool gdextension_spx_sprite_get_visible(GdInt id) { return false; }
+static void gdextension_spx_sprite_update_z_index(GdInt id, GdInt z) { print_line(vformat("Updating z index of %d to %d", id, z)); }
 // TODO add child
 
 // ui
-static gdint gdextension_spx_ui_create_button(gdstring path, gdrect rect, gdstring text) { return 0; }
-static gdint gdextension_spx_ui_create_label(gdstring path, gdrect rect, gdstring text) { return 0; }
-static gdint gdextension_spx_ui_create_image(gdstring path, gdrect rect, gdcolor gdcolor) { return 0; }
-static gdint gdextension_spx_ui_create_slider(gdstring path, gdrect rect, gdfloat value) { return 0; }
-static gdint gdextension_spx_ui_create_toggle(gdstring path, gdrect rect, gdbool value) { return 0; }
-static gdint gdextension_spx_ui_create_input(gdstring path, gdrect rect, gdstring text) { return 0; }
+static GdInt gdextension_spx_ui_create_button(GdString path, GdRect rect, GdString text) { return 0; }
+static GdInt gdextension_spx_ui_create_label(GdString path, GdRect rect, GdString text) { return 0; }
+static GdInt gdextension_spx_ui_create_image(GdString path, GdRect rect, GdColor GdColor) { return 0; }
+static GdInt gdextension_spx_ui_create_slider(GdString path, GdRect rect, GdFloat value) { return 0; }
+static GdInt gdextension_spx_ui_create_toggle(GdString path, GdRect rect, GdBool value) { return 0; }
+static GdInt gdextension_spx_ui_create_input(GdString path, GdRect rect, GdString text) { return 0; }
 
-static gdint gdextension_spx_ui_get_type(gdint id) { return 0; }
-static void gdextension_spx_ui_set_interactable(gdint id, gdbool interactable) { print_line(vformat("Updating interactable of %d to %s", id, interactable ? "true" : "false")); }
-static gdbool gdextension_spx_ui_get_interactable(gdint id) { return false; }
+static GdInt gdextension_spx_ui_get_type(GdInt id) { return 0; }
+static void gdextension_spx_ui_set_interactable(GdInt id, GdBool interactable) { print_line(vformat("Updating interactable of %d to %s", id, interactable ? "true" : "false")); }
+static GdBool gdextension_spx_ui_get_interactable(GdInt id) { return false; }
 
-static void gdextension_spx_ui_set_text(gdint id, gdstring text) { print_line(vformat("Updating text of %d to %s", id, text)); }
-static gdstring gdextension_spx_ui_get_text(gdint id) { return nullptr; }
+static void gdextension_spx_ui_set_text(GdInt id, GdString text) { print_line(vformat("Updating text of %d to %s", id, text)); }
+static GdString gdextension_spx_ui_get_text(GdInt id) { return nullptr; }
 
-static void gdextension_spx_ui_set_rect(gdint id, gdrect rect) { print_line(vformat("Updating rect of %d to %f, %f, %f, %f", id, rect.position.x, rect.position.y, rect.size.x, rect.size.y)); }
-static gdrect gdextension_spx_ui_get_rect(gdint id) { return gdrect(); }
+static void gdextension_spx_ui_set_rect(GdInt id, GdRect rect) { print_line(vformat("Updating rect of %d to %f, %f, %f, %f", id, rect.position.x, rect.position.y, rect.size.x, rect.size.y)); }
+static GdRect gdextension_spx_ui_get_rect(GdInt id) { return GdRect(); }
 
-static void gdextension_spx_ui_set_color(gdint id, gdcolor gdcolor) { print_line(vformat("Updating gdcolor of %d to %f, %f, %f, %f", id, gdcolor.r, gdcolor.g, gdcolor.b, gdcolor.a)); }
-static gdcolor gdextension_spx_ui_get_color(gdint id) { return gdcolor(); }
+static void gdextension_spx_ui_set_color(GdInt id, GdColor GdColor) { print_line(vformat("Updating GdColor of %d to %f, %f, %f, %f", id, GdColor.r, GdColor.g, GdColor.b, GdColor.a)); }
+static GdColor gdextension_spx_ui_get_color(GdInt id) { return GdColor(); }
 
-static void gdextension_spx_ui_set_font_size(gdint id, gdfloat size) { print_line(vformat("Updating font size of %d to %f", id, size)); }
-static gdfloat gdextension_spx_ui_get_font_size(gdint id) { return 0; }
+static void gdextension_spx_ui_set_font_size(GdInt id, GdFloat size) { print_line(vformat("Updating font size of %d to %f", id, size)); }
+static GdFloat gdextension_spx_ui_get_font_size(GdInt id) { return 0; }
 
-static void gdextension_spx_ui_set_visible(gdint id, gdbool visible) { print_line(vformat("Updating visibility of %d to %s", id, visible ? "true" : "false")); }
-static gdbool gdextension_spx_ui_get_visible(gdint id) { return false; }
+static void gdextension_spx_ui_set_visible(GdInt id, GdBool visible) { print_line(vformat("Updating visibility of %d to %s", id, visible ? "true" : "false")); }
+static GdBool gdextension_spx_ui_get_visible(GdInt id) { return false; }
 
 
 #define REGISTER_SPX_INTERFACE_FUNC(m_name) GDExtension::register_interface_function("spx_"#m_name, (GDExtensionInterfaceFunctionPtr)&gdextension_spx_##m_name)
