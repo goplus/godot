@@ -36,6 +36,7 @@
 #include "gdextension_interface.h"
 #ifndef NOT_GODOT_ENGINE
 #include "core/variant/variant.h"
+extern void gdextension_spx_setup_interface();
 #endif
 
 #ifndef __cplusplus
@@ -199,7 +200,16 @@ typedef void (*GDExtensionSpxCallbackOnUIClicked) (GdInt id);
 typedef void (*GDExtensionSpxCallbackOnUIToggle) (GdInt id, GdBool is_on);
 typedef void (*GDExtensionSpxCallbackOnUITextChanged) (GdInt id, GdString text);
 
-
+// string
+typedef void (*GDExtensionSpxStringNewWithLatin1Chars)(GDExtensionUninitializedStringPtr r_dest, const char *p_contents);
+typedef void (*GDExtensionSpxStringNewWithUtf8Chars)(GDExtensionUninitializedStringPtr r_dest, const char *p_contents);
+typedef void (*GDExtensionSpxStringNewWithLatin1CharsAndLen)(GDExtensionUninitializedStringPtr r_dest, const char *p_contents, GdInt p_size);
+typedef void (*GDExtensionSpxStringNewWithUtf8CharsAndLen)(GDExtensionUninitializedStringPtr r_dest, const char *p_contents, GdInt p_size);
+typedef GdInt (*GDExtensionSpxStringToLatin1Chars)(GDExtensionConstStringPtr p_self, char *r_text, GdInt p_max_write_length);
+typedef GdInt (*GDExtensionSpxStringToUtf8Chars)(GDExtensionConstStringPtr p_self, char *r_text, GdInt p_max_write_length);
+// variant
+typedef GDExtensionPtrConstructor (*GDExtensionSpxVariantGetPtrConstructor)(GDExtensionVariantType p_type, int32_t p_constructor);
+typedef GDExtensionPtrDestructor (*GDExtensionSpxVariantGetPtrDestructor)(GDExtensionVariantType p_type);
 
 typedef struct {
 	// engine
@@ -240,7 +250,6 @@ typedef struct {
 
 } SpxCallbackInfo;
 
-extern void gdextension_spx_setup_interface();
 
 #ifdef __cplusplus
 }
