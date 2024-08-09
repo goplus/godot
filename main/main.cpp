@@ -80,7 +80,7 @@
 #include "servers/text/text_server_dummy.h"
 #include "servers/text_server.h"
 #include "servers/xr_server.h"
-#include "core/extension/gdextension_spx_engine.h"
+#include "core/extension/spx.h"
 
 #ifdef TESTS_ENABLED
 #include "tests/test_main.h"
@@ -3505,7 +3505,7 @@ bool Main::start() {
 
 			OS::get_singleton()->benchmark_end_measure("game_load");
 
-			SpxEngine::on_start(sml->get_root());
+			Spx::on_start(sml->get_root());
 		}
 
 #ifdef TOOLS_ENABLED
@@ -3703,7 +3703,7 @@ bool Main::iteration() {
 	process_max = MAX(process_ticks, process_max);
 	uint64_t frame_time = OS::get_singleton()->get_ticks_usec() - ticks;
 
-	SpxEngine::on_update(process_step * time_scale);
+	Spx::on_update(process_step * time_scale);
 	for (int i = 0; i < ScriptServer::get_language_count(); i++) {
 		ScriptServer::get_language(i)->frame();
 	}
@@ -3806,7 +3806,7 @@ void Main::cleanup(bool p_force) {
 	}
 
 #ifdef TOOLS_ENABLED
-	SpxEngine::on_destroy();
+	Spx::on_destroy();
 #endif
 
 	for (int i = 0; i < TextServerManager::get_singleton()->get_interface_count(); i++) {
