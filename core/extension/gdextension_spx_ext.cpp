@@ -168,7 +168,7 @@ static GdBool gdextension_spx_ui_get_visible(GdInt id) { return false; }
 
 #define REGISTER_SPX_INTERFACE_FUNC(m_name) GDExtension::register_interface_function("spx_"#m_name, (GDExtensionInterfaceFunctionPtr)&gdextension_spx_##m_name)
 
-static void gdextension_spx_ext() {
+void gdextension_spx_setup_interface() {
 	REGISTER_SPX_INTERFACE_FUNC(global_register_callbacks);
 	REGISTER_SPX_INTERFACE_FUNC(input_get_mouse_pos);
 	REGISTER_SPX_INTERFACE_FUNC(input_get_mouse_state);

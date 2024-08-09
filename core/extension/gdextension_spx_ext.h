@@ -240,6 +240,7 @@ typedef struct {
 
 } SpxCallbackInfo;
 
+extern void gdextension_spx_setup_interface();
 
 #ifdef __cplusplus
 }

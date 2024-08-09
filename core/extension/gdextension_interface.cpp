@@ -41,7 +41,7 @@
 #include "core/os/memory.h"
 #include "core/variant/variant.h"
 #include "core/version.h"
-#include "core/extension/gdextension_spx_ext.cpp"
+#include "core/extension/gdextension_spx_ext.h"
 
 class CallableCustomExtension : public CallableCustom {
 	void *userdata;
@@ -1377,6 +1377,7 @@ static void gdextension_editor_remove_plugin(GDExtensionConstStringNamePtr p_cla
 #define REGISTER_INTERFACE_FUNC(m_name) GDExtension::register_interface_function(#m_name, (GDExtensionInterfaceFunctionPtr)&gdextension_##m_name)
 
 void gdextension_setup_interface() {
+	gdextension_spx_setup_interface();
 	REGISTER_INTERFACE_FUNC(get_godot_version);
 	REGISTER_INTERFACE_FUNC(mem_alloc);
 	REGISTER_INTERFACE_FUNC(mem_realloc);
@@ -1517,7 +1518,6 @@ void gdextension_setup_interface() {
 	REGISTER_INTERFACE_FUNC(classdb_get_class_tag);
 	REGISTER_INTERFACE_FUNC(editor_add_plugin);
 	REGISTER_INTERFACE_FUNC(editor_remove_plugin);
-	gdextension_spx_ext();
 }
 
 #undef REGISTER_INTERFACE_FUNCTION
