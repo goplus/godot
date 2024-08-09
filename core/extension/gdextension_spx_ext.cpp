@@ -114,7 +114,7 @@ static GdBool gdextension_spx_physic_is_collision_enabled(GdInt id) { return fal
 
 
 // sprite
-static GdInt gdextension_spx_sprite_instantiate_sprite(GdString path) { return 0; }
+static GdInt gdextension_spx_sprite_create_sprite(GdString path) { return 0; }
 static GdInt gdextension_spx_sprite_clone_sprite(GdInt id) { return 0; }
 static GdBool gdextension_spx_sprite_destroy_sprite(GdInt id) { return false; }
 static GdBool gdextension_spx_sprite_is_sprite_alive(GdInt id) { return false; }
@@ -208,7 +208,7 @@ void gdextension_spx_setup_interface() {
 	REGISTER_SPX_INTERFACE_FUNC(physic_is_trigger);
 	REGISTER_SPX_INTERFACE_FUNC(physic_set_collision_enabled);
 	REGISTER_SPX_INTERFACE_FUNC(physic_is_collision_enabled);
-	REGISTER_SPX_INTERFACE_FUNC(sprite_instantiate_sprite);
+	REGISTER_SPX_INTERFACE_FUNC(sprite_create_sprite);
 	REGISTER_SPX_INTERFACE_FUNC(sprite_clone_sprite);
 	REGISTER_SPX_INTERFACE_FUNC(sprite_destroy_sprite);
 	REGISTER_SPX_INTERFACE_FUNC(sprite_is_sprite_alive);
