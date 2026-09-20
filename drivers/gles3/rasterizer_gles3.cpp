@@ -417,12 +417,13 @@ void RasterizerGLES3::_blit_render_target_to_screen(RID p_render_target, Display
 
 	if (p_first) {
 		if (p_screen_rect.position != Vector2() || p_screen_rect.size != rt->size) {
-			// Viewport doesn't cover entire window so clear window to black before blitting.
+			// Fill uncovered window regions with the project's background color.
 			// Querying the actual window size from the DisplayServer would deadlock in separate render thread mode,
 			// so let's set the biggest viewport the implementation supports, to be sure the window is fully covered.
 			Size2i max_vp = GLES3::Utilities::get_singleton()->get_maximum_viewport_size();
 			glViewport(0, 0, max_vp[0], max_vp[1]);
-			glClearColor(0.0, 0.0, 0.0, 1.0);
+			const Color clear_color = texture_storage->get_default_clear_color();
+			glClearColor(clear_color.r, clear_color.g, clear_color.b, 1.0);
 			glClear(GL_COLOR_BUFFER_BIT);
 		}
 	}

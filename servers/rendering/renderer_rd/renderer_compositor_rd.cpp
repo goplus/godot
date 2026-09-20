@@ -43,7 +43,10 @@ void RendererCompositorRD::blit_render_targets_to_screen(DisplayServer::WindowID
 		return;
 	}
 
-	RD::DrawListID draw_list = RD::get_singleton()->draw_list_begin_for_screen(p_screen);
+	// Keep uncovered window regions opaque and consistent with the viewport background.
+	Color clear_color = texture_storage->get_default_clear_color();
+	clear_color.a = 1.0;
+	RD::DrawListID draw_list = RD::get_singleton()->draw_list_begin_for_screen(p_screen, clear_color);
 	ERR_FAIL_COND(draw_list == RD::INVALID_ID);
 
 	for (int i = 0; i < p_amount; i++) {
