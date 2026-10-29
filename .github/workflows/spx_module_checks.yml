@@ -40,6 +40,16 @@ jobs:
     name: Linux editor and SPX module unit tests
     runs-on: ubuntu-22.04
     timeout-minutes: 120
+    env:
+      CC: gcc
+      CXX: g++
+      GCOV: gcov
+      # Restore signatures and products together, without source, counts, or editor.
+      COVERAGE_BUILD_PATHS: |
+        .sconsign*.dblite
+        **/*.o
+        **/*.a
+        **/*.gcno
     steps:
       - name: Check out locked Godot source
         uses: actions/checkout@v6
@@ -75,77 +85,76 @@ jobs:
           ref: ${{ inputs.spx_ref }}
           toolchain-scope: native
           cache-scope: linux-x86_64-module-tests
+          cache-enabled: 'false'
 
-      - name: Resolve native build identity
-        id: identity
+      - name: Install coverage tools
+        run: python3 -m pip install -r .github/scripts/requirements.txt
+
+      - name: Verify coverage collection
+        run: python3 .github/scripts/spx_coverage_test.py
+
+      - name: Identify coverage build cache
+        id: coverage-context
         shell: bash
         env:
-          INPUT_RUNTIME_ABI: ${{ inputs.runtime_abi }}
-          INPUT_RUNTIME_VERSION: ${{ inputs.runtime_version }}
-          MODULE_PATH: ${{ steps.spx-build.outputs.module-path }}
+          CACHE_SCOPE: spx-coverage-v1-${{ runner.os }}-${{ runner.arch }}-${{ inputs.godot_ref }}-${{ hashFiles('.github/workflows/spx_module_checks.yml', '.github/actions/godot-build/action.yml', '.spx-source/godot_modules/spx/spx_scons_profile.json') }}
         run: |
           set -euo pipefail
+          toolchain="$(
+            set -e
+            {
+              printf '%s\n' "${ImageOS:-}" "${ImageVersion:-}" "${GITHUB_WORKSPACE}"
+              "${CC}" --version
+              "${CXX}" --version
+              "${GCOV}" --version
+              python3 --version
+              scons --version
+            } | sha256sum | cut -d ' ' -f 1
+          )"
+          module="$(git -C .spx-source rev-parse --verify HEAD:godot_modules/spx)"
+          printf '%s\n' "prefix=${CACHE_SCOPE}-${toolchain}" "module=${module}" >> "${GITHUB_OUTPUT}"
 
-          godot_origin="$(git remote get-url origin)"
-          godot_sha="$(git rev-parse --verify 'HEAD^{commit}')"
-          contract=.spx-source/.github/scripts/runtime_build_contract.py
-          module_relative_path="$(python3 "${contract}" source \
-            --lock .spx-source/internal/release/runtime.lock.json \
-            --github-output "${GITHUB_OUTPUT}" \
-            --runtime-version "${INPUT_RUNTIME_VERSION}" \
-            --runtime-abi "${INPUT_RUNTIME_ABI}" \
-            --godot-origin "${godot_origin}" \
-            --godot-commit "${godot_sha}" \
-            --toolchain-scope native)"
+      - name: Restore coverage build
+        id: coverage-cache
+        uses: actions/cache/restore@v5
+        with:
+          path: ${{ env.COVERAGE_BUILD_PATHS }}
+          key: ${{ steps.coverage-context.outputs.prefix }}-${{ steps.coverage-context.outputs.module }}
+          restore-keys: |
+            ${{ steps.coverage-context.outputs.prefix }}-
 
-          expected_module_path="$(MODULE_PATH=".spx-source/${module_relative_path}" python3 -c 'import os; from pathlib import Path; print(Path(os.environ["MODULE_PATH"]).resolve().as_posix())')"
-          if [ "${MODULE_PATH}" != "${expected_module_path}" ]; then
-            echo "[error] Resolved module path drifted: ${MODULE_PATH} != ${expected_module_path}" >&2
-            exit 1
+      - name: Prepare restored coverage build
+        env:
+          CACHE_HIT: ${{ steps.coverage-cache.outputs.cache-hit }}
+        run: |
+          python3 .github/scripts/spx_coverage.py reset
+          if [ "${CACHE_HIT}" != true ]; then
+            # Preserve engine objects, but rebuild the changed module and tests.
+            python3 .github/scripts/spx_coverage.py clean
           fi
-
-          spx_sha="$(git -C .spx-source rev-parse --verify 'HEAD^{commit}')"
-          module_sha="$(git -C .spx-source rev-parse "HEAD:${module_relative_path}")"
-          profile_sha="$(git -C .spx-source rev-parse "HEAD:${module_relative_path}/spx_scons_profile.json")"
-          printf '%s\n' \
-            "spx-sha=${spx_sha}" \
-            "godot-sha=${godot_sha}" \
-            "module-sha=${module_sha}" \
-            "profile-sha=${profile_sha}" >> "${GITHUB_OUTPUT}"
-
-      - name: Report native build identity
-        shell: bash
-        env:
-          GODOT_SHA: ${{ steps.identity.outputs.godot-sha }}
-          MODULE_SHA: ${{ steps.identity.outputs.module-sha }}
-          PROFILE_SHA: ${{ steps.identity.outputs.profile-sha }}
-          SCONS_VERSION: ${{ steps.identity.outputs.scons-version }}
-          SPX_SHA: ${{ steps.identity.outputs.spx-sha }}
-          TOOLCHAIN_SHA256: ${{ steps.identity.outputs.engine-toolchain-sha256 }}
-        run: |
-          set -euo pipefail
-          {
-            echo "### Native SPX module build identity"
-            echo
-            echo "| Input | Identity |"
-            echo "| --- | --- |"
-            echo "| SPX | \`${SPX_SHA}\` |"
-            echo "| Godot | \`${GODOT_SHA}\` |"
-            echo "| Module tree | \`${MODULE_SHA}\` |"
-            echo "| SCons profile | \`${PROFILE_SHA}\` |"
-            echo "| Native toolchain | \`${TOOLCHAIN_SHA256}\` (SCons \`${SCONS_VERSION}\`) |"
-          } >> "${GITHUB_STEP_SUMMARY}"
 
       - name: Build Linux editor with unit tests
         uses: ./.github/actions/godot-build
         with:
+          # Recheck capabilities: cached probe objects lack Configure's other files.
           sconsflags: >-
             ${{ steps.spx-build.outputs.editor-release-flags }}
-            dev_build=yes debug_symbols=no
+            dev_build=yes debug_symbols=no use_coverage=yes optimize=none fast_unsafe=no
+            --config=force
+            CC=${{ env.CC }} CXX=${{ env.CXX }}
           custom-modules: ${{ steps.spx-build.outputs.module-path }}
           platform: linuxbsd
           target: editor
           tests: 'yes'
+          # SCons caches objects but does not track their .gcno sidecar files.
+          scons-cache: ''
+
+      - name: Save coverage build
+        if: steps.coverage-cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v5
+        with:
+          path: ${{ env.COVERAGE_BUILD_PATHS }}
+          key: ${{ steps.coverage-cache.outputs.cache-primary-key }}
 
       - name: Run SPX module unit tests
         shell: bash
@@ -161,7 +170,20 @@ jobs:
             echo "[error] The tests=yes build did not register SPX module unit tests" >&2
             exit 1
           fi
+          python3 .github/scripts/spx_coverage.py reset
           "${godot_bin}" --headless --test --test-case='*SPX*' --force-colors
+
+      - name: Collect SPX module coverage
+        run: python3 .github/scripts/spx_coverage.py report
+
+      - name: Upload SPX module coverage
+        uses: actions/upload-artifact@v5
+        with:
+          name: coverage-spx-cpp
+          path: coverage.xml
+          if-no-files-found: error
+          retention-days: 1
+          overwrite: true
 
   web-normal-smoke:
     name: Web normal compile smoke
@@ -186,67 +208,6 @@ jobs:
           ref: ${{ inputs.spx_ref }}
           toolchain-scope: web
           cache-scope: web-normal-smoke
-
-      - name: Resolve Web build identity
-        id: identity
-        shell: bash
-        env:
-          INPUT_RUNTIME_ABI: ${{ inputs.runtime_abi }}
-          INPUT_RUNTIME_VERSION: ${{ inputs.runtime_version }}
-          MODULE_PATH: ${{ steps.spx-build.outputs.module-path }}
-        run: |
-          set -euo pipefail
-
-          godot_origin="$(git remote get-url origin)"
-          godot_sha="$(git rev-parse --verify 'HEAD^{commit}')"
-          contract=.spx-source/.github/scripts/runtime_build_contract.py
-          module_relative_path="$(python3 "${contract}" source \
-            --lock .spx-source/internal/release/runtime.lock.json \
-            --github-output "${GITHUB_OUTPUT}" \
-            --runtime-version "${INPUT_RUNTIME_VERSION}" \
-            --runtime-abi "${INPUT_RUNTIME_ABI}" \
-            --godot-origin "${godot_origin}" \
-            --godot-commit "${godot_sha}" \
-            --toolchain-scope web)"
-
-          expected_module_path="$(MODULE_PATH=".spx-source/${module_relative_path}" python3 -c 'import os; from pathlib import Path; print(Path(os.environ["MODULE_PATH"]).resolve().as_posix())')"
-          if [ "${MODULE_PATH}" != "${expected_module_path}" ]; then
-            echo "[error] Resolved module path drifted: ${MODULE_PATH} != ${expected_module_path}" >&2
-            exit 1
-          fi
-
-          spx_sha="$(git -C .spx-source rev-parse --verify 'HEAD^{commit}')"
-          module_sha="$(git -C .spx-source rev-parse "HEAD:${module_relative_path}")"
-          profile_sha="$(git -C .spx-source rev-parse "HEAD:${module_relative_path}/spx_scons_profile.json")"
-          printf '%s\n' \
-            "spx-sha=${spx_sha}" \
-            "godot-sha=${godot_sha}" \
-            "module-sha=${module_sha}" \
-            "profile-sha=${profile_sha}" >> "${GITHUB_OUTPUT}"
-
-      - name: Report Web build identity
-        shell: bash
-        env:
-          EMSDK_VERSION: ${{ steps.identity.outputs.emsdk-version }}
-          GODOT_SHA: ${{ steps.identity.outputs.godot-sha }}
-          MODULE_SHA: ${{ steps.identity.outputs.module-sha }}
-          PROFILE_SHA: ${{ steps.identity.outputs.profile-sha }}
-          SCONS_VERSION: ${{ steps.identity.outputs.scons-version }}
-          SPX_SHA: ${{ steps.identity.outputs.spx-sha }}
-          TOOLCHAIN_SHA256: ${{ steps.identity.outputs.engine-toolchain-sha256 }}
-        run: |
-          set -euo pipefail
-          {
-            echo "### Web SPX module build identity"
-            echo
-            echo "| Input | Identity |"
-            echo "| --- | --- |"
-            echo "| SPX | \`${SPX_SHA}\` |"
-            echo "| Godot | \`${GODOT_SHA}\` |"
-            echo "| Module tree | \`${MODULE_SHA}\` |"
-            echo "| SCons profile | \`${PROFILE_SHA}\` |"
-            echo "| Web toolchain | \`${TOOLCHAIN_SHA256}\` (SCons \`${SCONS_VERSION}\`, Emscripten \`${EMSDK_VERSION}\`) |"
-          } >> "${GITHUB_STEP_SUMMARY}"
 
       - name: Set up locked Emscripten
         uses: mymindstorm/setup-emsdk@v14
