@@ -18,12 +18,18 @@ inputs:
     description: Toolchain digest scope for the target platform (native, web, or android).
     required: true
 outputs:
+  spx-sha:
+    description: Full SPX source commit SHA.
+    value: ${{ steps.source.outputs.spx-sha }}
   godot-sha:
     description: Full Godot source commit SHA.
     value: ${{ steps.source.outputs.godot-sha }}
   module-sha:
     description: Git tree SHA for the external SPX module.
     value: ${{ steps.source.outputs.module-sha }}
+  profile-sha:
+    description: Git blob SHA for the external SPX module SCons profile.
+    value: ${{ steps.source.outputs.profile-sha }}
   module-path:
     description: Absolute path to the external module declared by the SPX runtime lock.
     value: ${{ steps.source.outputs.module-path }}
@@ -69,7 +75,7 @@ runs:
         clean: true
         sparse-checkout: |
           /internal/release/runtime.lock.json
-          /.github/scripts/runtime_build_contract.py
+          /.github/scripts/runtime/build_contract.py
         sparse-checkout-cone-mode: false
 
     - name: Resolve source identifiers
@@ -94,7 +100,7 @@ runs:
 
         source_root=.spx-source
         lock_path="${source_root}/internal/release/runtime.lock.json"
-        contract_path="${source_root}/.github/scripts/runtime_build_contract.py"
+        contract_path="${source_root}/.github/scripts/runtime/build_contract.py"
         if [ ! -f "${lock_path}" ] || [ ! -f "${contract_path}" ]; then
           echo "[error] Selected SPX source does not contain the runtime build contract" >&2
           exit 1
@@ -147,17 +153,21 @@ runs:
         fi
 
         module_path="$(MODULE_CHECKOUT_PATH="${module_checkout_path}" "${python_command}" -c 'import os; from pathlib import Path; print(Path(os.environ["MODULE_CHECKOUT_PATH"]).resolve().as_posix())')"
-        spx_sha="$(git -C "${source_root}" rev-parse HEAD)"
-        module_sha="$(git -C "${source_root}" rev-parse "HEAD:${module_relative_path}")"
+        spx_sha="$(git -C "${source_root}" rev-parse --verify 'HEAD^{commit}')"
+        module_sha="$(git -C "${source_root}" rev-parse --verify "HEAD:${module_relative_path}")"
+        profile_sha="$(git -C "${source_root}" rev-parse --verify "HEAD:${module_relative_path}/spx_scons_profile.json")"
 
         echo "[info] Runtime version: ${INPUT_RUNTIME_VERSION#v}"
         echo "[info] Godot commit: ${current_godot_sha}"
         echo "[info] SPX commit: ${spx_sha}"
         echo "[info] SPX module tree: ${module_sha}"
+        echo "[info] SPX SCons profile: ${profile_sha}"
         echo "[info] SPX module path: ${module_path}"
 
+        echo "spx-sha=${spx_sha}" >> "${GITHUB_OUTPUT}"
         echo "godot-sha=${current_godot_sha}" >> "${GITHUB_OUTPUT}"
         echo "module-sha=${module_sha}" >> "${GITHUB_OUTPUT}"
+        echo "profile-sha=${profile_sha}" >> "${GITHUB_OUTPUT}"
         echo "module-path=${module_path}" >> "${GITHUB_OUTPUT}"
 
         "${python_command}" "${contract_path}" profile \
