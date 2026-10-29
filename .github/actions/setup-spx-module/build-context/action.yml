@@ -20,6 +20,9 @@ inputs:
   cache-scope:
     description: Stable platform-specific compatible-build namespace for the SCons cache.
     required: true
+  cache-enabled:
+    description: Restore and save SCons object files. Disable for coverage builds that also need uncached .gcno files.
+    default: 'true'
 
 outputs:
   module-path:
@@ -82,6 +85,7 @@ runs:
         toolchain-scope: ${{ inputs.toolchain-scope }}
 
     - name: Restore SCons cache
+      if: inputs.cache-enabled == 'true'
       uses: actions/cache@v5
       with:
         path: ${{ github.workspace }}/.scons_cache/
@@ -95,3 +99,32 @@ runs:
       uses: ./.github/actions/godot-deps
       with:
         scons-version: ${{ steps.source.outputs.scons-version }}
+
+    - name: Report SPX build identity
+      shell: python
+      env:
+        SOURCE_IDENTITY: ${{ toJSON(steps.source.outputs) }}
+        TOOLCHAIN_SCOPE: ${{ inputs.toolchain-scope }}
+      run: |
+        import json
+        import os
+
+        identity = json.loads(os.environ["SOURCE_IDENTITY"])
+        scope = os.environ["TOOLCHAIN_SCOPE"]
+        fields = [
+            ("SPX", "spx-sha"),
+            ("Godot", "godot-sha"),
+            ("Module tree", "module-sha"),
+            ("SCons profile", "profile-sha"),
+            ("Toolchain SHA-256", "engine-toolchain-sha256"),
+            ("SCons", "scons-version"),
+        ]
+        if scope == "web":
+            fields.append(("Emscripten", "emsdk-version"))
+        elif scope == "android":
+            fields.extend((("Android NDK", "android-ndk-version"), ("JDK", "jdk-version")))
+        with open(os.environ["GITHUB_STEP_SUMMARY"], "a", encoding="utf-8") as summary:
+            print("### SPX module build identity\n\n| Input | Identity |\n| --- | --- |", file=summary)
+            print(f"| Toolchain scope | `{scope}` |", file=summary)
+            for label, key in fields:
+                print(f"| {label} | `{identity[key]}` |", file=summary)
