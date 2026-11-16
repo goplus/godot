@@ -98,9 +98,11 @@ jobs:
       - name: Build Web ${{ matrix.mode }}
         uses: ./.github/actions/godot-build
         with:
+          # Release artifacts, including dry-run packages, keep full optimization.
           sconsflags: >-
             ${{ matrix.target == 'editor' && steps.spx-build.outputs.common-flags || steps.spx-build.outputs.template-release-flags }}
             ${{ matrix.threads_flag }} ${{ matrix.extra_flags }}
+            web_link_optimize=yes
           custom-modules: ${{ steps.spx-build.outputs.module-path }}
           platform: web
           target: ${{ matrix.target }}
