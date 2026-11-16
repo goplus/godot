@@ -98,7 +98,8 @@ jobs:
       - name: Build Web ${{ matrix.mode }}
         uses: ./.github/actions/godot-build
         with:
-          # Release artifacts, including dry-run packages, keep full optimization.
+          # SPX's godot_modules/spx/config.py defines web_link_optimize for Web linking.
+          # Keep the override after profile flags (last wins) for both editor and templates.
           sconsflags: >-
             ${{ matrix.target == 'editor' && steps.spx-build.outputs.common-flags || steps.spx-build.outputs.template-release-flags }}
             ${{ matrix.threads_flag }} ${{ matrix.extra_flags }}
