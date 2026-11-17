@@ -207,6 +207,8 @@ TEST_CASE("[TCPServer] When stopped shouldn't accept new connections") {
 	CHECK_FALSE(server->is_connection_available());
 
 	CHECK_EQ(new_client->get_status(), StreamPeerTCP::STATUS_ERROR);
+	CHECK_EQ(new_client->poll(), Error::OK);
+	CHECK_EQ(new_client->get_status(), StreamPeerTCP::STATUS_ERROR);
 	new_client->disconnect_from_host();
 	CHECK_EQ(new_client->get_status(), StreamPeerTCP::STATUS_NONE);
 }

@@ -351,8 +351,16 @@ Error NetSocketUnix::connect_to_host(IPAddress p_host, uint16_t p_port) {
 
 		switch (err) {
 			// We are already connected.
-			case ERR_NET_IS_CONNECTED:
+			case ERR_NET_IS_CONNECTED: {
+				// macOS can report EISCONN while a connection error is pending.
+				int socket_error = 0;
+				socklen_t error_size = sizeof(socket_error);
+				if (getsockopt(_sock, SOL_SOCKET, SO_ERROR, &socket_error, &error_size) != 0 || socket_error != 0) {
+					close();
+					return FAILED;
+				}
 				return OK;
+			}
 			// Still waiting to connect, try again in a while.
 			case ERR_NET_WOULD_BLOCK:
 			case ERR_NET_IN_PROGRESS:
