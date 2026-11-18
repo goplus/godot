@@ -256,6 +256,8 @@ print('Standard C header:', bool(has_header))
             self.assertEqual(engine_object.stat().st_mtime_ns, object_times[engine_object])
 
         with self.subTest("fallback removes deleted source metadata but preserves engine objects"):
+            # Restored caches omit the executable, so this build must relink.
+            self.binary.unlink()
             (self.module / "spx_uncovered.cpp").unlink()
             self.prepare_build(False)
             self.assertFalse(list(self.root.rglob("*.gcda")))
