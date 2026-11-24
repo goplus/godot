@@ -9,6 +9,7 @@ import sys
 import tempfile
 import unittest
 import xml.etree.ElementTree as ET
+import zipfile
 from pathlib import Path
 
 import spx_coverage
@@ -274,6 +275,46 @@ print('Standard C header:', bool(has_header))
 
 
 class CoverageWorkflowTest(unittest.TestCase):
+    def test_web_export_reuses_tested_editor_and_template(self):
+        workflow = load_yaml(REPO / ".github/workflows/spx_module_checks.yml")
+        self.assertEqual(workflow["on"]["workflow_call"]["inputs"]["export_web_assets"], {
+            "description": "Upload the tested editor and Web template for the caller's Web bundle.",
+            "type": "boolean", "default": "false",
+        })
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            editor = root / "bin/godot.linuxbsd.editor.dev.x86_64"
+            write(editor, "tested editor", executable=True)
+            template = root / "bin/godot.web.template_release.wasm32.nothreads.zip"
+            with zipfile.ZipFile(template, "w") as archive:
+                archive.writestr("godot.wasm", "tested Web template")
+            for job_name, prerequisite, package_name, artifact_name, artifact_path in (
+                ("linux-editor-tests", "Upload SPX module coverage", "Package tested editor for Web export",
+                 "spx-module-editor-linux-x86_64", "artifacts/editor-linux-x86_64.zip"),
+                ("web-normal-smoke", "Verify Web normal archive", "Package tested Web template",
+                 "spx-module-web", "artifacts/web.zip"),
+            ):
+                with self.subTest(job=job_name):
+                    steps = workflow["jobs"][job_name]["steps"]
+                    package = next(step for step in steps if step["name"] == package_name)
+                    upload = next(step for step in steps if step.get("with", {}).get("name") == artifact_name)
+                    checked = next(step for step in steps if step["name"] == prerequisite)
+                    self.assertLess(steps.index(checked), steps.index(package))
+                    self.assertLess(steps.index(package), steps.index(upload))
+                    self.assertEqual(package["if"], "inputs.export_web_assets")
+                    self.assertEqual(upload["if"], "inputs.export_web_assets")
+                    self.assertEqual(upload["with"], {
+                        "name": artifact_name, "path": artifact_path, "if-no-files-found": "error",
+                        "retention-days": "7", "overwrite": "true",
+                    })
+                    subprocess.run(["bash", "-e", "-c", package["run"]], cwd=root,
+                                   check=True, capture_output=True)
+            with zipfile.ZipFile(root / "artifacts/editor-linux-x86_64.zip") as archive:
+                self.assertEqual(archive.namelist(), ["godot.linuxbsd.editor.x86_64"])
+                self.assertEqual(archive.read("godot.linuxbsd.editor.x86_64"), editor.read_bytes())
+                self.assertTrue(archive.getinfo("godot.linuxbsd.editor.x86_64").external_attr >> 16 & 0o111)
+            self.assertEqual((root / "artifacts/web.zip").read_bytes(), template.read_bytes())
+
     def test_cache_and_coverage_inputs(self):
         context = load_yaml(REPO / ".github/actions/setup-spx-module/build-context/action.yml")
         self.assertEqual(context["inputs"]["cache-enabled"]["default"], "true")

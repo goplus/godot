@@ -27,6 +27,10 @@ on:
         description: Full current SPX commit SHA to test.
         required: true
         type: string
+      export_web_assets:
+        description: Upload the tested editor and Web template for the caller's Web bundle.
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -185,6 +189,23 @@ jobs:
           retention-days: 1
           overwrite: true
 
+      - name: Package tested editor for Web export
+        if: inputs.export_web_assets
+        run: |
+          mkdir -p artifacts
+          cp bin/godot.linuxbsd.editor.dev.x86_64 artifacts/godot.linuxbsd.editor.x86_64
+          zip -j artifacts/editor-linux-x86_64.zip artifacts/godot.linuxbsd.editor.x86_64
+
+      - name: Upload tested editor for Web export
+        if: inputs.export_web_assets
+        uses: actions/upload-artifact@v5
+        with:
+          name: spx-module-editor-linux-x86_64
+          path: artifacts/editor-linux-x86_64.zip
+          if-no-files-found: error
+          retention-days: 7
+          overwrite: true
+
   web-normal-smoke:
     name: Web normal compile smoke
     runs-on: ubuntu-22.04
@@ -231,3 +252,19 @@ jobs:
 
       - name: Verify Web normal archive
         run: python3 -m zipfile --test bin/godot.web.template_release.wasm32.nothreads.zip
+
+      - name: Package tested Web template
+        if: inputs.export_web_assets
+        run: |
+          mkdir -p artifacts
+          cp bin/godot.web.template_release.wasm32.nothreads.zip artifacts/web.zip
+
+      - name: Upload tested Web template
+        if: inputs.export_web_assets
+        uses: actions/upload-artifact@v5
+        with:
+          name: spx-module-web
+          path: artifacts/web.zip
+          if-no-files-found: error
+          retention-days: 7
+          overwrite: true
