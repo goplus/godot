@@ -28,7 +28,7 @@ on:
         required: true
         type: string
       export_web_assets:
-        description: Upload the tested editor and Web template for the caller's Web bundle.
+        description: Upload the coverage-instrumented host editor and tested Web template for CI Web exports.
         type: boolean
         default: false
 
@@ -189,19 +189,21 @@ jobs:
           retention-days: 1
           overwrite: true
 
-      - name: Package tested editor for Web export
+      - name: Package coverage editor for Web export
         if: inputs.export_web_assets
         run: |
           mkdir -p artifacts
+          # buildctl installs the CI host editor by this exact ZIP member name.
           cp bin/godot.linuxbsd.editor.dev.x86_64 artifacts/godot.linuxbsd.editor.x86_64
           zip -j artifacts/editor-linux-x86_64.zip artifacts/godot.linuxbsd.editor.x86_64
 
-      - name: Upload tested editor for Web export
+      - name: Upload coverage editor for Web export
         if: inputs.export_web_assets
         uses: actions/upload-artifact@v5
         with:
           name: spx-module-editor-linux-x86_64
           path: artifacts/editor-linux-x86_64.zip
+          compression-level: 0
           if-no-files-found: error
           retention-days: 7
           overwrite: true
@@ -265,6 +267,7 @@ jobs:
         with:
           name: spx-module-web
           path: artifacts/web.zip
+          compression-level: 0
           if-no-files-found: error
           retention-days: 7
           overwrite: true
